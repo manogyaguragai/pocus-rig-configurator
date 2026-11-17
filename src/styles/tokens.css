@@ -1,0 +1,58 @@
+:root {
+  /* surfaces */
+  --page: #fafafa;
+  --card: #ffffff;
+  --raised: #f4f4f5;
+  --viewport: #f0f0f1;
+  --hairline: rgba(23, 23, 23, 0.08);
+  --hairline-strong: rgba(23, 23, 23, 0.14);
+  --track: #e4e4e7;
+
+  /* text */
+  --text: #171717;
+  --text-2: #525252;
+  --text-3: #737373;
+
+  /* accent: primary button and focus rings only */
+  --accent: #00735f;
+  --accent-hover: #006b58;
+
+  /* status */
+  --ok: #16a34a;
+  --warn: #b45309;
+
+  /* model */
+  --model-teal: #0b8a73;
+  --model-slate: #2a3038;
+
+  /* type */
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --weight-regular: 400;
+  --weight-medium: 500;
+
+  /* 4 px grid */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 20px;
+  --s6: 24px;
+  --s8: 32px;
+
+  /* radii */
+  --r-control: 8px;
+  --r-segment: 6px;
+  --r-tag: 4px;
+
+  /* motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-fast: 120ms;
+  --t-base: 150ms;
+  --t-slow: 180ms;
+
+  /* layout */
+  --topbar-h: 56px;
+  --bottombar-h: 64px;
+  --panel-w: 320px;
+}

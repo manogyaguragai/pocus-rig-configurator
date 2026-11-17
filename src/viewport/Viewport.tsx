@@ -163,15 +163,14 @@ export type ViewportProps = { meshes: PartMeshes; className?: string };
 
 export function Viewport({ meshes, className }: ViewportProps) {
   const clear = useViewStore((s) => s.clearSelection);
-  const framing = useMemo(() => {
+  // Frame once, on the first meshes that arrive. Later part-set changes (mount or glove switches)
+  // must not move the camera, or they would discard the user's orbit.
+  const framed = useRef<THREE.Vector3 | null>(null);
+  if (!framed.current) {
     const b = sceneBBox(meshes, 0);
-    const c = b
-      ? new THREE.Vector3((b.min[0] + b.max[0]) / 2, (b.min[1] + b.max[1]) / 2, (b.min[2] + b.max[2]) / 2)
-      : new THREE.Vector3(0, -30, 60);
-    return c;
-    // frame once per set of parts present, not on every mesh swap
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [Object.keys(meshes).sort().join(',')]);
+    if (b) framed.current = new THREE.Vector3((b.min[0] + b.max[0]) / 2, (b.min[1] + b.max[1]) / 2, (b.min[2] + b.max[2]) / 2);
+  }
+  const framing = useMemo(() => framed.current ?? new THREE.Vector3(0, -30, 60), [framed.current]);
 
   return (
     <div className={className} style={{ position: 'relative', width: '100%', height: '100%', background: VIEWPORT_BG }}>
