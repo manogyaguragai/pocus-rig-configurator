@@ -18,6 +18,13 @@ export function formatBBoxDims(b: BBox): string {
   return `${d[0]} × ${d[1]} × ${d[2]} mm`;
 }
 
+/** Largest print extent per axis across a set of parts, as `80.0 × 60.0 × 100.0 mm`; null when empty. */
+export function largestPartDims(boxes: readonly BBox[]): string | null {
+  if (boxes.length === 0) return null;
+  const m = [0, 1, 2].map((k) => Math.max(...boxes.map((b) => b.max[k]! - b.min[k]!)));
+  return `${m[0]!.toFixed(1)} × ${m[1]!.toFixed(1)} × ${m[2]!.toFixed(1)} mm`;
+}
+
 export function partCountText(n: number): string {
   return `${n} ${n === 1 ? 'part' : 'parts'}`;
 }
@@ -67,4 +74,20 @@ const PRINT_NOTES: Record<PartId, string> = {
 
 export function printNote(id: PartId): string {
   return PRINT_NOTES[id];
+}
+
+export type NumberRange = { min: number; max: number; step: number };
+
+/**
+ * Turns typed text into a value on the control's grid, clamped to its range.
+ * Returns null when the text holds no number (the caller keeps the old value).
+ */
+export function commitValue(raw: string, r: NumberRange): number | null {
+  const cleaned = raw.replace(/mm/gi, '').replace(',', '.').trim();
+  if (cleaned === '') return null;
+  const n = Number(cleaned);
+  if (!Number.isFinite(n)) return null;
+  const clamped = Math.min(r.max, Math.max(r.min, n));
+  const snapped = r.min + Math.round((clamped - r.min) / r.step) * r.step;
+  return Math.min(r.max, Math.max(r.min, Number(snapped.toFixed(6))));
 }

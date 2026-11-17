@@ -1,63 +1,51 @@
+import { useMemo } from 'react';
 import { Html, Line } from '@react-three/drei';
 import type { BBox } from '../geometry/types';
-import { formatLength, type Vec3 } from './pose';
+import { dimensionLayout } from './layout';
 import '@fontsource/ibm-plex-mono/latin-400.css';
 
-const COLOR = '#171717';
-const GAP = 8;
-const TICK = 3;
-
-type Dim = { a: Vec3; b: Vec3; tick: Vec3; label: string };
-
-function lengthDim(a: Vec3, b: Vec3, tick: Vec3, len: number): Dim {
-  return { a, b, tick, label: formatLength(len) };
-}
+const INK = '#1b1f24';
+const BACKING = 'rgba(236,235,232,0.94)';
 
 /**
- * Caliper dimension lines (end ticks + mono label) for one part's bbox, drawn in the part's
- * local (Blender) frame so they travel with it during the exploded transition.
+ * Caliper dimension lines for one part's bbox, in the part's local frame so they travel with it
+ * during the exploded transition. Lines are 1 px, drawn over the part; labels keep a constant
+ * on-screen size and sit on a small backing so they read over any surface.
  */
-export function Dimensions({ bbox }: { bbox: BBox }) {
-  const { min, max } = bbox;
-  const w = max[0] - min[0];
-  const d = max[1] - min[1];
-  const h = max[2] - min[2];
-  const fy = min[1] - GAP;
-  const dims: Dim[] = [
-    lengthDim([min[0], fy, min[2]], [max[0], fy, min[2]], [0, 0, 1], w),
-    lengthDim([max[0] + GAP, min[1], min[2]], [max[0] + GAP, max[1], min[2]], [1, 0, 0], d),
-    lengthDim([min[0] - GAP, fy, min[2]], [min[0] - GAP, fy, max[2]], [1, 0, 0], h),
-  ];
+export function Dimensions({ bbox, others }: { bbox: BBox; others?: BBox[] }) {
+  const dims = useMemo(() => dimensionLayout(bbox, others), [bbox, others]);
+  const main = { color: INK, lineWidth: 1, depthTest: false, transparent: true, opacity: 0.9 } as const;
+  const thin = { color: INK, lineWidth: 1, depthTest: false, transparent: true, opacity: 0.45 } as const;
   return (
     <group renderOrder={10}>
-      {dims.map((m, i) => {
-        const t = m.tick;
-        const mid: Vec3 = [(m.a[0] + m.b[0]) / 2, (m.a[1] + m.b[1]) / 2, (m.a[2] + m.b[2]) / 2];
-        const q = (v: Vec3, s: number): Vec3 => [v[0] + t[0] * s * TICK, v[1] + t[1] * s * TICK, v[2] + t[2] * s * TICK];
-        const lineProps = { color: COLOR, lineWidth: 1, depthTest: false, transparent: true } as const;
-        return (
-          <group key={i}>
-            <Line points={[m.a, m.b]} {...lineProps} />
-            <Line points={[q(m.a, -1), q(m.a, 1)]} {...lineProps} />
-            <Line points={[q(m.b, -1), q(m.b, 1)]} {...lineProps} />
-            <Html position={mid} center zIndexRange={[10, 0]} style={{ pointerEvents: 'none' }}>
-              <span
-                style={{
-                  font: '400 12px/1 "IBM Plex Mono", ui-monospace, monospace',
-                  color: COLOR,
-                  background: '#fff',
-                  border: '1px solid rgba(23,23,23,.14)',
-                  borderRadius: 4,
-                  padding: '3px 6px',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {m.label}
-              </span>
-            </Html>
-          </group>
-        );
-      })}
+      {dims.map((m) => (
+        <group key={m.axis}>
+          <Line points={[m.a, m.b]} {...main} renderOrder={10} />
+          {m.ext.map((e, i) => (
+            <Line key={`e${i}`} points={e} {...thin} renderOrder={10} />
+          ))}
+          {m.ticks.map((t, i) => (
+            <Line key={`t${i}`} points={t} {...main} lineWidth={1.5} renderOrder={10} />
+          ))}
+          <Html position={m.mid} center zIndexRange={[10, 0]} style={{ pointerEvents: 'none' }}>
+            <span
+              style={{
+                font: '400 11px/1 "IBM Plex Mono", ui-monospace, monospace',
+                letterSpacing: '0.01em',
+                color: INK,
+                background: BACKING,
+                borderRadius: 3,
+                padding: '3px 5px',
+                whiteSpace: 'nowrap',
+                fontVariantNumeric: 'tabular-nums',
+                boxShadow: '0 0 0 1px rgba(27,31,36,0.12)',
+              }}
+            >
+              {m.label}
+            </span>
+          </Html>
+        </group>
+      ))}
     </group>
   );
 }

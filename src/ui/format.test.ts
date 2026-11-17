@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatBBoxDims, formatClearance, formatLength, partCountText, printNote, statusView } from './format';
+import { commitValue, formatBBoxDims, formatClearance, formatLength, partCountText, printNote, statusView } from './format';
 
 describe('number formats', () => {
   it('lengths use one decimal', () => {
@@ -37,5 +37,31 @@ describe('print notes', () => {
     expect(printNote('plate')).toContain('back face down');
     expect(printNote('vclamp')).toContain('plate face down');
     expect(printNote('holster')).toContain('upright');
+  });
+});
+
+describe('commitValue', () => {
+  const r = { min: 0.15, max: 0.4, step: 0.05 };
+  it('clamps to the range', () => {
+    expect(commitValue('9', r)).toBe(0.4);
+    expect(commitValue('0', r)).toBe(0.15);
+  });
+  it('snaps to the step grid', () => {
+    expect(commitValue('0.27', r)).toBe(0.25);
+    expect(commitValue('0.28 mm', r)).toBe(0.3);
+    expect(commitValue('62,3', { min: 30, max: 80, step: 0.5 })).toBe(62.5);
+  });
+  it('rejects text without a number', () => {
+    expect(commitValue('', r)).toBeNull();
+    expect(commitValue('abc', r)).toBeNull();
+  });
+});
+
+import { largestPartDims as _lp } from './format';
+describe('largestPartDims', () => {
+  it('takes the largest extent per axis', () => {
+    const b = (x: number, y: number, z: number) => ({ min: [0, 0, 0] as [number, number, number], max: [x, y, z] as [number, number, number] });
+    expect(_lp([b(80, 20, 5), b(10, 60, 100)])).toBe('80.0 × 60.0 × 100.0 mm');
+    expect(_lp([])).toBeNull();
   });
 });

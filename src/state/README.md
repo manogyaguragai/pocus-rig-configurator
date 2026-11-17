@@ -38,5 +38,7 @@ ignored. Decoding never throws.
 
 About 400 ms after the last change, the params are written to localStorage and
 the hash is updated with `history.replaceState`, so edits do not add history
-entries. A `hashchange` event (for example, pasting a new link) loads the hash
+entries. A pending write is also flushed synchronously on `pagehide`, on
+`beforeunload` and when the page becomes hidden (no dialogs), so a reload right
+after a change or Reset to defaults keeps it. A `hashchange` event (for example, pasting a new link) loads the hash
 over the defaults. Blocked or full storage is ignored silently.

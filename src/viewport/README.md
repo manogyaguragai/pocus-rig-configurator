@@ -4,7 +4,10 @@ A React Three Fiber scene that draws the meshes the worker returns.
 
 | File | Purpose |
 |---|---|
-| `Viewport.tsx` | Canvas, lighting, bed outline, orbit controls, per-part meshes |
+| `Viewport.tsx` | Canvas, lighting, procedural environment, orbit controls, per-part meshes |
+| `framing.ts` | Camera framing maths (`frameRig` for the initial and Reset view) |
+| `layout.ts` | Caliper dimension line layout |
+| `bed.ts` | Procedural bed textures |
 | `pose.ts` | Pose offsets, scene bounds, length formatting, easing |
 | `Dimensions.tsx` | Dimension lines and labels for the selected part |
 
@@ -30,4 +33,7 @@ positions. The status bar shows the print-orientation size from the worker's
 ## Camera
 
 The canvas renders on demand. The camera is framed once, on the first meshes
-that arrive, so later mount or glove changes do not reset the user's orbit.
+that arrive with `frameRig`: the assembled rig fills about 60-70% of the viewport
+height, and the camera backs off only as far as needed to keep the exploded pose
+in frame (corner projection, not a bounding sphere). Reset view reframes the
+same way for the parts present now. Later mount or glove changes do not reset the user's orbit.

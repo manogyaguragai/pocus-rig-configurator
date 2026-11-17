@@ -121,7 +121,9 @@ describe('startApp', () => {
     let h = hash;
     const listeners = new Set<() => void>();
     const replaced: string[] = [];
+    const leave = new Set<() => void>();
     const env: AppEnv = {
+      onLeave: (fn) => { leave.add(fn); return () => leave.delete(fn); },
       getHash: () => h,
       replaceHash: (x) => { replaced.push(x); h = '#' + x; },
       onHashChange: (fn) => { listeners.add(fn); return () => listeners.delete(fn); },
@@ -134,7 +136,7 @@ describe('startApp', () => {
     };
     const loadMesh = vi.fn(async () => ({ params: { ...D } as Params, parts: [] }));
     const dispose = startApp({ env, createClient: () => client as never, loadMesh, saveDebounceMs: 400 });
-    return { client, loadMesh, dispose, replaced, storage, fire: (nh: string) => { h = nh; listeners.forEach((f) => f()); } };
+    return { client, loadMesh, dispose, replaced, storage, leave: () => leave.forEach((f) => f()), fire: (nh: string) => { h = nh; listeners.forEach((f) => f()); } };
   };
 
   it('defaults: seeds the mesh, view changes never request, config change requests once after debounce', async () => {
@@ -156,6 +158,25 @@ describe('startApp', () => {
     a.dispose();
     useConfigStore.getState().setParam('gelH', 100);
     expect(a.client.request).toHaveBeenCalledTimes(3);
+  });
+
+  it('flushes a pending write synchronously when the page is hidden or unloaded', async () => {
+    const a = setup();
+    await vi.advanceTimersByTimeAsync(0);
+    useConfigStore.getState().setParam('gelH', 150);
+    expect(a.replaced).toEqual([]); // still debounced
+    a.leave();
+    expect(a.replaced).toEqual([encodeHash({ ...D, gelH: 150 })]);
+    expect(JSON.parse(a.storage.data[STORAGE_KEY]!).params.gelH).toBe(150);
+    a.leave(); // nothing pending: no duplicate write
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(a.replaced).toHaveLength(1);
+    // reset to defaults, then leave before the debounce fires
+    useConfigStore.getState().reset();
+    a.leave();
+    expect(JSON.parse(a.storage.data[STORAGE_KEY]!).params.gelH).toBe(D.gelH);
+    expect(a.replaced[1]).toBe(encodeHash(D));
+    a.dispose();
   });
 
   it('non-default initial params request the real build and skip the default mesh', async () => {

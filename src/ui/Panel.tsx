@@ -2,7 +2,7 @@ import { PROBE_CLEARANCE, RANGES } from '../geometry/constants';
 import { MOUNT_TYPES, PROBE_PRESETS, resolveProbe, type GloveMode, type MountType, type ProbePresetId } from '../geometry/params';
 import { useConfigStore } from '../state/configStore';
 import { useRigStatus } from '../state/selectors';
-import { formatClearance, formatLength, statusView } from './format';
+import { formatLength, statusView } from './format';
 import { Segmented, SelectField, Slider } from './Controls';
 
 const MOUNT_LABELS: Record<MountType, string> = {
@@ -36,7 +36,7 @@ export function Panel() {
   return (
     <div className="panel">
       <h1 className="title">Size the rig to your kit</h1>
-      <p className="lead">A wall rig for a handheld probe, gel packets and gloves. Every part fits a 256 mm bed</p>
+      <p className="lead">A wall rig for a handheld probe, gel packets and gloves. Set the sizes, then download the print kit</p>
 
       <section aria-labelledby="sec-printer">
         <h2 id="sec-printer">Printer</h2>
@@ -44,9 +44,9 @@ export function Panel() {
           label="Fit clearance"
           value={params.tolerance}
           {...RANGES.tolerance}
-          format={formatClearance}
+          decimals={2}
           onChange={(v) => setParam('tolerance', v)}
-          help="Print the calibration piece first to check it"
+          help="Print the calibration piece first to check this value on your printer"
         />
       </section>
 
@@ -62,16 +62,16 @@ export function Panel() {
         />
         {custom && (
           <>
-            <Slider label="Cradle width" value={params.cradleW} {...RANGES.cradleW} format={formatLength} onChange={(v) => setParam('cradleW', v)} />
-            <Slider label="Cradle depth" value={params.cradleD} {...RANGES.cradleD} format={formatLength} onChange={(v) => setParam('cradleD', v)} />
+            <Slider label="Cradle width" value={params.cradleW} {...RANGES.cradleW} decimals={1} onChange={(v) => setParam('cradleW', v)} />
+            <Slider label="Cradle depth" value={params.cradleD} {...RANGES.cradleD} decimals={1} onChange={(v) => setParam('cradleD', v)} />
           </>
         )}
-        <Slider label="Holster height" value={params.holsterH} {...RANGES.holsterH} format={formatLength} onChange={(v) => setParam('holsterH', v)} />
+        <Slider label="Holster height" value={params.holsterH} {...RANGES.holsterH} decimals={1} onChange={(v) => setParam('holsterH', v)} />
       </section>
 
       <section aria-labelledby="sec-gel">
         <h2 id="sec-gel">Gel packets</h2>
-        <Slider label="Packet height" value={params.gelH} {...RANGES.gelH} format={formatLength} onChange={(v) => setParam('gelH', v)} />
+        <Slider label="Packet height" value={params.gelH} {...RANGES.gelH} decimals={1} onChange={(v) => setParam('gelH', v)} />
       </section>
 
       <section aria-labelledby="sec-gloves">
@@ -98,8 +98,11 @@ export function StatusRow() {
     <div className={`status${v.warning ? ' warn' : ''}`} role="status">
       <div className="status-main">
         <span className="dot" aria-hidden="true" />
-        <span>{v.text}</span>
-        <span className="num status-count">{v.count}</span>
+        <span>
+          {v.text}
+          {' · '}
+          <span className="num">{v.count}</span>
+        </span>
       </div>
       {v.details.length > 0 && (
         <ul className="status-list">

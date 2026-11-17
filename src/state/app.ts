@@ -11,6 +11,8 @@ export type AppEnv = {
   replaceHash(hash: string): void;
   onHashChange(fn: () => void): () => void;
   storage: StorageLike | null;
+  /** Calls `fn` when the page is being hidden or unloaded (pagehide, hidden visibility, beforeunload). Optional. */
+  onLeave?(fn: () => void): () => void;
 };
 
 export type AppDeps = {
@@ -35,6 +37,17 @@ function browserEnv(): AppEnv {
       return () => window.removeEventListener('hashchange', fn);
     },
     storage,
+    onLeave: (fn) => {
+      const onVis = () => { if (document.visibilityState === 'hidden') fn(); };
+      window.addEventListener('pagehide', fn);
+      window.addEventListener('beforeunload', fn);
+      document.addEventListener('visibilitychange', onVis);
+      return () => {
+        window.removeEventListener('pagehide', fn);
+        window.removeEventListener('beforeunload', fn);
+        document.removeEventListener('visibilitychange', onVis);
+      };
+    },
   };
 }
 
@@ -73,6 +86,7 @@ export function startApp(deps: Partial<AppDeps> = {}): () => void {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let dirty = false;
   const persist = () => {
+    clearTimeout(timer);
     timer = undefined;
     if (!dirty) return;
     dirty = false;
@@ -97,8 +111,12 @@ export function startApp(deps: Partial<AppDeps> = {}): () => void {
     if (p) cfg.getState().setParams({ ...DEFAULT_PARAMS, ...p });
   });
 
+  // Flush a pending write synchronously when the page goes away, so a fast reload or tab close keeps the last change.
+  const offLeave = env.onLeave?.(persist) ?? (() => {});
+
   return () => {
     disposed = true;
+    offLeave();
     offHash();
     offConfig();
     clearTimeout(timer);

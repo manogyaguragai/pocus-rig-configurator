@@ -1,5 +1,6 @@
-import { useId, useRef, type KeyboardEvent, type ReactNode } from 'react';
+import { useId, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { commitValue } from './format';
 
 export const ICON = { size: 16, strokeWidth: 1.5, 'aria-hidden': true } as const;
 
@@ -9,21 +10,71 @@ type SliderProps = {
   min: number;
   max: number;
   step: number;
-  format: (v: number) => string;
+  /** Factory default; drawn as a labelled tick */
+  default: number;
+  /** Decimals shown: 1 for lengths, 2 for clearance */
+  decimals: 1 | 2;
   onChange: (v: number) => void;
   help?: ReactNode;
 };
 
-export function Slider({ label, value, min, max, step, format, onChange, help }: SliderProps) {
+const clampTo = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+
+/** Tick fractions (0..1): every step when there are few, otherwise ten divisions. */
+function tickFractions(min: number, max: number, step: number): number[] {
+  const steps = Math.round((max - min) / step);
+  const n = steps <= 10 ? steps : 10;
+  return Array.from({ length: n + 1 }, (_, i) => i / n);
+}
+
+export function Slider({ label, value, min, max, step, default: def, decimals, onChange, help }: SliderProps) {
   const id = useId();
-  const pct = ((value - min) / (max - min)) * 100;
+  const [draft, setDraft] = useState<string | null>(null);
+  const span = max - min;
+  const frac = (v: number) => (v - min) / span;
+  const fmt = (v: number) => `${v.toFixed(decimals)} mm`;
+
+  const commit = () => {
+    if (draft === null) return;
+    const n = commitValue(draft, { min, max, step });
+    if (n !== null && n !== value) onChange(n);
+    setDraft(null);
+  };
+  const onInputKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      commit();
+    } else if (e.key === 'Escape') {
+      setDraft(null);
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const dir = e.key === 'ArrowUp' ? 1 : -1;
+      const n = commitValue(String(value + dir * step), { min, max, step });
+      if (n !== null) onChange(n);
+      setDraft(null);
+    }
+  };
+
+  const labelled = [min, max, ...(frac(def) > 0.1 && frac(def) < 0.9 ? [def] : [])];
   return (
     <div className="field">
       <div className="field-head">
         <label htmlFor={id}>{label}</label>
-        <output htmlFor={id} className="num">
-          {format(value)}
-        </output>
+        <span className="numfield">
+          <input
+            type="text"
+            inputMode="decimal"
+            className="num numinput"
+            aria-label={`${label}, type a value`}
+            value={draft ?? value.toFixed(decimals)}
+            onChange={(e) => setDraft(e.target.value)}
+            onFocus={(e) => e.target.select()}
+            onBlur={commit}
+            onKeyDown={onInputKey}
+          />
+          <span className="unit num" aria-hidden="true">
+            mm
+          </span>
+        </span>
       </div>
       <input
         id={id}
@@ -31,12 +82,23 @@ export function Slider({ label, value, min, max, step, format, onChange, help }:
         min={min}
         max={max}
         step={step}
-        value={value}
-        style={{ '--p': `${pct}%` } as React.CSSProperties}
-        aria-valuetext={format(value)}
+        value={clampTo(value, min, max)}
+        style={{ '--f': frac(clampTo(value, min, max)) } as CSSProperties}
+        aria-valuetext={fmt(value)}
         aria-describedby={help ? `${id}-help` : undefined}
         onChange={(e) => onChange(Number(e.target.value))}
       />
+      <div className="ticks" aria-hidden="true">
+        {tickFractions(min, max, step).map((f) => (
+          <span key={f} className="tick" style={{ '--f': f } as CSSProperties} />
+        ))}
+        <span className="tick default" style={{ '--f': frac(def) } as CSSProperties} />
+        {labelled.map((v) => (
+          <span key={v} className="tick-label num" style={{ '--f': frac(v) } as CSSProperties}>
+            {v.toFixed(decimals)}
+          </span>
+        ))}
+      </div>
       {help && (
         <p className="help" id={`${id}-help`}>
           {help}

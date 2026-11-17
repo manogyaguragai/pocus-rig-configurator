@@ -1,21 +1,22 @@
 :root {
   /* surfaces */
-  --page: #fafafa;
+  --page: #f7f7f8;
   --card: #ffffff;
-  --raised: #f4f4f5;
-  --viewport: #f0f0f1;
-  --hairline: rgba(23, 23, 23, 0.08);
-  --hairline-strong: rgba(23, 23, 23, 0.14);
-  --track: #e4e4e7;
+  --raised: #f1f1f2;
+  --viewport: #ebeae7;
+  --hairline: rgba(24, 24, 27, 0.09);
+  --hairline-strong: rgba(24, 24, 27, 0.18);
+  --track: #dcdce0;
 
   /* text */
-  --text: #171717;
-  --text-2: #525252;
-  --text-3: #737373;
+  --text: #18181b;
+  --text-2: #52525b;
+  --text-3: #63636d;
 
-  /* accent: primary button and focus rings only */
-  --accent: #00735f;
-  --accent-hover: #006b58;
+  /* accent: primary button, focus ring, selected part, links on hover (5.3:1 on white) */
+  --accent: #0a7a66;
+  --accent-hover: #086958;
+  --accent-soft: #e8f4f1;
 
   /* status */
   --ok: #16a34a;
@@ -44,6 +45,7 @@
   --r-control: 8px;
   --r-segment: 6px;
   --r-tag: 4px;
+  --hit: 36px;
 
   /* motion */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -52,7 +54,7 @@
   --t-slow: 180ms;
 
   /* layout */
-  --topbar-h: 56px;
+  --topbar-h: 52px;
   --bottombar-h: 64px;
   --panel-w: 320px;
 }

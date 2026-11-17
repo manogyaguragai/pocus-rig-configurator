@@ -1,29 +1,23 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, Download, Ruler, ScanEye } from 'lucide-react';
 import { Viewport, type PartMeshes } from '../viewport/Viewport';
-import { PART_META } from '../geometry/types';
+import { PART_META, type BBox, type PartId } from '../geometry/types';
 import { useGeometryStore } from '../store/geometryStore';
 import { useViewStore, type ViewMode } from '../store/viewStore';
 import { startApp } from '../state/app';
 import { useActiveRigParts, useBuildState } from '../state/selectors';
 import { ICON, Segmented } from './Controls';
 import { Panel, StatusRow } from './Panel';
+import { Credit } from './Credit';
+import { Mark } from './Mark';
+import { PartsList } from './PartsList';
 import { defaultExportHandlers, useExportStore, type ExportHandlers } from './exportHooks';
-import { formatBBoxDims, printNote } from './format';
+import { formatBBoxDims, largestPartDims, partCountText, printNote } from './format';
 
 const VIEW_OPTIONS: { value: ViewMode; label: string }[] = [
   { value: 'assembled', label: 'Assembled' },
   { value: 'exploded', label: 'Exploded' },
 ];
-
-function Mark() {
-  return (
-    <svg className="mark" viewBox="0 0 20 20" aria-hidden="true">
-      <rect x="1" y="1" width="18" height="18" rx="5" fill="currentColor" />
-      <path d="M5.5 15h9l-2.2-10h-4.6z" fill="var(--card)" />
-    </svg>
-  );
-}
 
 export function App(props: Partial<ExportHandlers> = {}) {
   const handlers: ExportHandlers = { ...defaultExportHandlers, ...props };
@@ -58,13 +52,19 @@ export function App(props: Partial<ExportHandlers> = {}) {
   const exportError = useExportStore((s) => s.error);
 
   const selMesh = selected ? meshes[selected] : undefined;
+  const selectPart = useViewStore((s) => s.selectPart);
+  const boxes = useMemo(() => {
+    const out: Partial<Record<PartId, BBox>> = {};
+    for (const id of active) if (meshes[id]) out[id] = meshes[id]!.printBbox;
+    return out;
+  }, [meshes, active]);
 
   return (
     <div className="app">
       <header className="topbar">
         <div className="brand">
           <Mark />
-          <span>POCUS Rig</span>
+          <span>POCUS rig</span>
           <span className="brand-sub">configurator</span>
         </div>
         <div className="spacer" />
@@ -72,6 +72,7 @@ export function App(props: Partial<ExportHandlers> = {}) {
           type="button"
           className="link"
           aria-label="Calibration piece"
+          title="Calibration piece"
           disabled={exportBusy !== null}
           aria-busy={exportBusy === 'calibration'}
           onClick={handlers.onExportCalibration}
@@ -109,29 +110,42 @@ export function App(props: Partial<ExportHandlers> = {}) {
               </p>
             )}
           </div>
-          <div className="bar" aria-live="polite">
-            {selected ? (
-              <>
-                <span className="part">{PART_META[selected].label}</span>
-                <span className="num bar-dims">{selMesh ? formatBBoxDims(selMesh.printBbox) : ''}</span>
-                <span className="meta">{printNote(selected)}</span>
-              </>
-            ) : (
-              <span className="meta">Select a part</span>
-            )}
-            <div className="spacer" />
-            <button
-              type="button"
-              className="btn secondary"
-              disabled={!selected || exportBusy !== null}
-              aria-busy={exportBusy === 'part'}
-              aria-label={selected ? undefined : 'Part STL, select a part first'}
-              title={selected ? undefined : 'Select a part first'}
-              onClick={() => handlers.onExportPartStl(selected)}
-            >
-              <Download {...ICON} />
-              <span>{exportBusy === 'part' ? 'Building STL' : 'Part STL'}</span>
-            </button>
+          <div className="bar">
+            <PartsList parts={active} boxes={boxes} selected={selected} onSelect={selectPart} />
+            <div className="readout" aria-live="polite">
+              {selected ? (
+                <>
+                  <div className="readout-main">
+                    <span className="part">
+                      <span className={`swatch ${PART_META[selected].material}`} aria-hidden="true" />
+                      {PART_META[selected].label}
+                    </span>
+                    <span className="num bar-dims">{selMesh ? formatBBoxDims(selMesh.printBbox) : ''}</span>
+                    <span className="meta note">{printNote(selected)}</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn secondary"
+                    disabled={exportBusy !== null}
+                    aria-busy={exportBusy === 'part'}
+                    onClick={() => handlers.onExportPartStl(selected)}
+                  >
+                    <Download {...ICON} />
+                    <span>{exportBusy === 'part' ? 'Building STL' : 'Part STL'}</span>
+                  </button>
+                </>
+              ) : (
+                <div className="readout-main quiet">
+                  <span className="part">{partCountText(active.length)}</span>
+                  {largestPartDims(Object.values(boxes)) && (
+                    <>
+                      <span className="meta">Largest print size</span>
+                      <span className="num bar-dims">{largestPartDims(Object.values(boxes))}</span>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -151,6 +165,7 @@ export function App(props: Partial<ExportHandlers> = {}) {
             <Panel />
           </div>
           <StatusRow />
+          <Credit />
         </aside>
       </main>
     </div>
