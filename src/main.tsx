@@ -1,3 +1,5 @@
 import { createRoot } from 'react-dom/client';
+import { DevApp } from './dev/DevApp';
 
-createRoot(document.getElementById('root')!).render(<div>POCUS rig configurator</div>);
+// Temporary: replaced by the Phase 3 app shell.
+createRoot(document.getElementById('root')!).render(<DevApp />);
