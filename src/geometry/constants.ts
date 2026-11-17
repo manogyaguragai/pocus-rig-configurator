@@ -1,4 +1,4 @@
-// Single definition of every fixed number. SPEC refs are to ai-notes/SPEC.md;
+// Single definition of every fixed number. "SPEC" rows refer to the project design spec;
 // "ref" means pocus_rig.py. All lengths in mm, Blender frame (Z up).
 
 export type Range = { readonly min: number; readonly max: number; readonly step: number; readonly default: number };
@@ -11,6 +11,9 @@ export const RANGES = {
   holsterH: { min: 100, max: 160, step: 1, default: 100 },
   gelH: { min: 85, max: 200, step: 1, default: 125 },
 } as const satisfies Record<string, Range>;
+
+/** Clearance added to each published probe dimension (width and thickness) to get the cradle top size. */
+export const PROBE_CLEARANCE = 4;
 
 // ---- SPEC 4b fixed constants ------------------------------------------------
 /** Bed reference 256 x 256 x 256 (SPEC 4b). */

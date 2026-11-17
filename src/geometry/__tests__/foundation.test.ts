@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
-  ASSEMBLY_LIFT_Z, DEFAULT_PARAMS, RANGES, Scope, addFemaleBlock, addMaleRail, clampParams, femaleProfile,
+  ASSEMBLY_LIFT_Z, DEFAULT_PARAMS, PROBE_CLEARANCE, PROBE_PRESETS, RANGES, Scope, addFemaleBlock, addMaleRail, clampParams, femaleProfile,
   layout, loadManifold, maleProfile, printMatrix, resolveProbe, toPrintOrientation, withScope,
   type ManifoldApi,
 } from '../index';
@@ -125,6 +125,20 @@ describe('params', () => {
   it('presets fill cradle size, custom uses sliders', () => {
     expect(resolveProbe({ ...DEFAULT_PARAMS, cradleW: 70 }).cradleW).toBe(70);
     const r = resolveProbe({ ...DEFAULT_PARAMS, cradleW: 70, probePreset: 'clariusHD3' });
-    expect(r).toMatchObject({ cradleW: 62, cradleD: 44, verified: false });
+    expect(r).toMatchObject({ cradleW: 80, cradleD: 36, verified: false });
+  });
+  it('every preset cradle is published size + PROBE_CLEARANCE and inside the slider ranges', () => {
+    for (const x of PROBE_PRESETS.filter((q) => q.id !== 'custom')) {
+      expect(x.verified, x.id).toBe(false);
+      expect(x.cradleW, x.id).toBe(x.probeW! + PROBE_CLEARANCE);
+      expect(x.cradleD, x.id).toBe(x.probeD! + PROBE_CLEARANCE);
+      expect(x.cradleW).toBeGreaterThanOrEqual(RANGES.cradleW.min);
+      expect(x.cradleW).toBeLessThanOrEqual(RANGES.cradleW.max);
+      expect(x.cradleD).toBeGreaterThanOrEqual(RANGES.cradleD.min);
+      expect(x.cradleD).toBeLessThanOrEqual(RANGES.cradleD.max);
+      const r = resolveProbe({ ...DEFAULT_PARAMS, probePreset: x.id });
+      expect([r.cradleW, r.cradleD]).toEqual([x.cradleW, x.cradleD]);
+    }
+    expect(PROBE_PRESETS.map((x) => x.id)).toEqual(['custom', 'butterflyIQ3', 'vscanAirCL', 'clariusHD3']);
   });
 });

@@ -1,0 +1,68 @@
+POCUS Rig assembly notes
+Designed by Dr. Mandeep Guragai and Manogya Guragai
+
+Before you print
+----------------
+Print the calibration piece first.
+This kit uses a fit clearance of 0.25 mm. The calibration piece has one male rail and three slot blocks at 0.20, 0.25 and 0.30 mm (marked with 1, 2 and 3 notches). Pick the slot that slides on the rail snugly by hand, then regenerate the kit with that clearance if it is not the middle one.
+Preset probe sizes come from published manufacturer dimensions plus 4 mm clearance and have not been measured. Check your probe in the holster cradle with calipers before relying on a preset.
+All parts are sized to print on a 256 mm bed in the orientation given below. The dovetail flanks are designed to print without supports; check other overhangs in your slicer.
+
+Parameters (JSON)
+-----------------
+{
+  "tolerance": 0.25,
+  "probePreset": "vscanAirCL",
+  "cradleW": 44.5,
+  "cradleD": 49.5,
+  "holsterH": 124,
+  "gelH": 116,
+  "gloveMode": "tube",
+  "mount": "ivpole"
+}
+
+Parts and print orientation
+---------------------------
+- Wall plate (file name: POCUS_WallPlate_tol0p25.stl)
+    print: back face down, rail pointing up
+    role: carries the rail the holster slides onto
+- Probe holster (file name: POCUS_Holster_tol0p25.stl)
+    print: upright
+    role: probe cradle; has a slot at the back and a rail on each side
+- Gel packet caddy (file name: POCUS_GelCaddy_tol0p25.stl)
+    print: upright
+    role: gel packet caddy; slot on the face towards the holster
+- Glove tube (file name: POCUS_GloveTube_tol0p25.stl)
+    print: upright
+    role: rolled glove pairs; slot on the face towards the holster
+- IV pole V-clamp (file name: POCUS_VClamp_tol0p25.stl)
+    print: plate face down, V groove pointing up
+    role: clamps the plate to a vertical pole
+The .3mf file holds all of these parts laid out on one bed, slate for the plate and V-clamp, teal for the rest.
+
+What drops onto what
+--------------------
+- Plate rail -> holster back slot (the slot in the block on the back of the holster)
+- Holster right rail -> gel caddy slot
+- Holster left rail -> glove tube slot
+Each slot is open at the bottom and closed at the top. Start with the slot opening at the lower end of the rail, push the part up along the rail until the closed end of the slot stops on the rail, then fit the pin.
+Do not force a part that will not slide. Check the fit against the calibration piece first.
+
+M3 pin positions
+----------------
+Every rail and slot block pair has a pin hole of dia 3.4 mm through it at z = 40 mm along the rail (the rail spans 10 to 80 mm, the slot block 0 to 84 mm in the same frame).
+Push a 3 mm pin or M3 screw through the hole in each pair after the parts are seated. This stops the part lifting off the rail. Use one pin per rail and slot pair.
+
+Mount: IV pole clamp
+--------------------
+1. The plate has the AMPS pattern of four M4 holes (30 mm x 38 mm) and the V-clamp is a separate printed part.
+2. Join the plate to the plate face of the V-clamp. That face has four blind holes (dia 5.6 mm, 6 mm deep) at the AMPS positions; the screw or insert type is your choice, it is not defined here.
+3. Put the V groove against the pole. Pass a hose clamp through the wide tunnel (12 mm tall) in the middle of the clamp, and zip ties through the two narrow tunnels (5 mm tall) near its top and bottom, then tighten around the pole.
+4. The tunnels run through the clamp body between the plate face and the V groove.
+
+Assembly order
+--------------
+1. Fix the plate to its mount.
+2. Slide the holster onto the plate rail and fit the pin.
+3. Slide the gel caddy onto the holster right rail and fit the pin.
+4. Slide the glove tube onto the holster left rail and fit the pin.

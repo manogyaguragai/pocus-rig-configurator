@@ -33,6 +33,17 @@ describe('hash', () => {
       expect(decodeHash(encodeHash(p))).toEqual(p);
     }
   });
+  it('every preset round trips through the hash', () => {
+    for (const x of PROBE_PRESETS) {
+      const p = clampParams({ ...D, probePreset: x.id });
+      expect(decodeHash(encodeHash(p))?.probePreset).toBe(x.id);
+      expect(clampParams(decodeHash(encodeHash(p))!)).toEqual(p);
+    }
+  });
+  it('a removed preset id in an old hash falls back to Custom size', () => {
+    const p = clampParams(decodeHash('#t=0.25&p=removedPreset&w=62&d=44&h=100&g=125&gl=tube&m=tape&v=1')!);
+    expect(p.probePreset).toBe('custom');
+  });
   it('clamps out of range, drops garbage, never throws', () => {
     expect(decodeHash('t=9&w=-4&gl=box&m=nope&v=1')).toEqual({ tolerance: 0.4, cradleW: 30, gloveMode: 'box' });
     expect(decodeHash('w=abc&h=&v=1')).toBeNull();

@@ -54,9 +54,8 @@ describe('PART_DEPS matches reality', () => {
     for (const key of Object.keys(perturb) as (keyof Params)[]) {
       const listed = PART_DEPS[id].includes(key);
       // Known, documented exceptions where "listed" does not change the mesh:
-      //  - probePreset: every preset is still the 62 x 44 placeholder (TODO(measure)), so the mesh is identical.
       //  - vclamp/mount: mount decides whether the V-clamp EXISTS; the solid itself has no parameters.
-      const meshIndependent = key === 'probePreset' || (id === 'vclamp' && key === 'mount');
+      const meshIndependent = id === 'vclamp' && key === 'mount';
       it(`${id}: ${key} ${listed ? 'is listed' : 'is not listed'}`, () => {
         const changed = !same(baseMesh(id), mesh(id, P(perturb[key])));
         if (!listed) expect(changed, 'unlisted param changed the mesh').toBe(false);

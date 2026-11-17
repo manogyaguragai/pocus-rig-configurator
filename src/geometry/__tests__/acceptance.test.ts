@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
   ASSEMBLY_LIFT_Z, DEFAULT_PARAMS, Scope, activeParts, assemblyOffset, buildAll, buildPart, buildPartIn,
-  clampParams, loadManifold, type Manifold, type ManifoldApi, type Params, type PartId,
+  clampParams, loadManifold, PROBE_PRESETS, type Manifold, type ManifoldApi, type Params, type PartId,
 } from '../index';
 import { checkMeshEdges } from '../meshCheck';
 import { makePlateReference } from '../parts/plate';
@@ -179,4 +179,36 @@ describe('criterion 4: all 320 parameter-space corners', () => {
     expect(n).toBe(320);
     expect(bad).toEqual([]);
   }, 1_800_000);
+});
+
+describe('probe presets: manifold, fit 250 mm, no mating intersections', () => {
+  it('every preset at defaults and at corners', async () => {
+    const bad: string[] = [];
+    let n = 0;
+    for (const preset of PROBE_PRESETS.map((x) => x.id).filter((id) => id !== 'custom'))
+      for (const [tolerance, holsterH, gelH] of [[0.25, 100, 125], [0.15, 100, 85], [0.4, 160, 200], [0.15, 160, 200], [0.4, 100, 85]] as const)
+        for (const gloveMode of ['tube', 'box'] as const)
+          for (const mount of ['tape', 'ivpole'] as const) {
+            const p = clampParams({ ...DEFAULT_PARAMS, probePreset: preset, tolerance, holsterH, gelH, gloveMode, mount });
+            const tag = `${preset} tol${tolerance} H${holsterH} G${gelH} ${gloveMode} ${mount}`;
+            n++;
+            for (const r of await buildAll(p, api)) {
+              if (r.status !== 'NoError') bad.push(`${tag} ${r.id}: status ${r.status}`);
+              if (checkMeshEdges(r.mesh).nonManifoldEdges || checkMeshEdges(r.printMesh).nonManifoldEdges) bad.push(`${tag} ${r.id}: non-manifold`);
+              for (let a = 0; a < 3; a++) {
+                const d = r.printBBox.max[a]! - r.printBBox.min[a]!;
+                if (d > 250) bad.push(`${tag} ${r.id}: print bbox axis ${a} = ${d.toFixed(1)}`);
+              }
+            }
+            const s = new Scope(api);
+            try {
+              for (const { pair, vol } of pairIntersections(s, assembled(s, p)))
+                if (!(vol < EPS)) bad.push(`${tag} ${pair}: intersection ${vol} mm3`);
+            } finally { s.dispose(); }
+          }
+    err(`\npreset checks: ${n} combos, ${bad.length} failures`);
+    if (bad.length) err(bad.slice(0, 40).join('\n'));
+    expect(n).toBe(60);
+    expect(bad).toEqual([]);
+  }, 600_000);
 });

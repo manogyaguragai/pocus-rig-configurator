@@ -38,6 +38,10 @@ function browserEnv(): AppEnv {
   };
 }
 
+let activeClient: GeometryClient | null = null;
+/** The client created by the running startApp (null before start / after dispose). Used by exports. */
+export const getGeometryClient = (): GeometryClient | null => activeClient;
+
 const isDefault = (p: Params) => (Object.keys(DEFAULT_PARAMS) as (keyof Params)[]).every((k) => p[k] === DEFAULT_PARAMS[k]);
 
 /** Wires config -> geometry client -> geometry store, plus URL hash and autosave. Returns dispose. */
@@ -52,6 +56,7 @@ export function startApp(deps: Partial<AppDeps> = {}): () => void {
   cfg.setState({ params: initial });
 
   const client = createClient();
+  activeClient = client;
   const disconnect = connectGeometryClient(client);
   let disposed = false;
 
@@ -100,5 +105,6 @@ export function startApp(deps: Partial<AppDeps> = {}): () => void {
     persist();
     disconnect();
     client.dispose();
+    if (activeClient === client) activeClient = null;
   };
 }

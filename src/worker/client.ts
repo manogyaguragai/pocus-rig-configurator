@@ -1,6 +1,8 @@
 import { activeParts, clampParams, PART_DEPS, type Params, type PartId } from '../geometry';
 import type { PartMesh, WorkerLike, WorkerResponse } from './protocol';
 
+export type OnceMeshes = Partial<Record<PartId, PartMesh>>;
+
 export type GeometrySnapshot = {
   /** Meshes of the last applied build (kept until a newer result replaces them). */
   meshes: Readonly<Partial<Record<PartId, PartMesh>>>;
@@ -33,6 +35,8 @@ export class GeometryClient {
   private jobId = 0;
   private inflight: { id: number; params: Params; parts: PartId[] } | null = null;
   private listeners = new Set<() => void>();
+  private onceId = 0;
+  private once = new Map<number, { resolve: (m: OnceMeshes) => void; reject: (e: Error) => void }>();
   private snap: GeometrySnapshot = {
     meshes: {},
     appliedParams: null,
@@ -47,7 +51,10 @@ export class GeometryClient {
     this.debounceMs = opts.debounceMs ?? 200;
     this.worker = createWorker();
     this.worker.onmessage = (ev) => this.onMessage(ev.data);
-    this.worker.onerror = (ev) => this.fail(this.inflight?.id ?? this.jobId, ev.message ?? 'Worker error');
+    this.worker.onerror = (ev) => {
+      this.rejectOnce(ev.message ?? 'Worker error');
+      this.fail(this.inflight?.id ?? this.jobId, ev.message ?? 'Worker error');
+    };
   }
 
   subscribe = (fn: () => void): (() => void) => {
@@ -78,7 +85,31 @@ export class GeometryClient {
     this.timer = setTimeout(() => this.flush(), this.debounceMs);
   }
 
+  /**
+   * One-off build of the given parts with the given params (e.g. calibration pieces). Posts its
+   * own request, never touches the snapshot, jobsStarted, the debounce timer or the stale-job
+   * logic, so slider changes cannot cancel it and it cannot cancel them.
+   */
+  buildOnce(params: Partial<Params>, parts: PartId[]): Promise<OnceMeshes> {
+    const requestId = ++this.onceId;
+    return new Promise((resolve, reject) => {
+      this.once.set(requestId, { resolve, reject });
+      this.worker.postMessage({ type: 'buildOnce', requestId, params: clampParams(params), parts });
+    });
+  }
+
+  /** Number of one-off builds started (separate from `jobsStarted`). */
+  get onceStarted(): number {
+    return this.onceId;
+  }
+
+  private rejectOnce(message: string): void {
+    for (const p of this.once.values()) p.reject(new Error(message));
+    this.once.clear();
+  }
+
   dispose(): void {
+    this.rejectOnce('Worker stopped');
     clearTimeout(this.timer);
     this.worker.terminate();
     this.listeners.clear();
@@ -102,6 +133,14 @@ export class GeometryClient {
 
   private onMessage(msg: WorkerResponse): void {
     if (msg.type === 'ready') return this.set({ workerReady: true });
+    if (msg.type === 'onceResult' || msg.type === 'onceError') {
+      const p = this.once.get(msg.requestId);
+      if (!p) return;
+      this.once.delete(msg.requestId);
+      if (msg.type === 'onceError') p.reject(new Error(msg.message));
+      else p.resolve(Object.fromEntries(msg.parts.map((m) => [m.id, m])) as OnceMeshes);
+      return;
+    }
     if (msg.jobId !== this.jobId || !this.inflight || this.inflight.id !== msg.jobId) return; // stale
     if (msg.type === 'error') return this.fail(msg.jobId, msg.message);
     const { params } = this.inflight;

@@ -9,6 +9,15 @@ const post = (msg: WorkerResponse, transfer: Transferable[] = []) => ctx.postMes
 // Messages arriving while WASM loads wait on the same cached promise inside runBuildJob.
 ctx.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
   const req = ev.data;
+  if (req.type === 'buildOnce') {
+    try {
+      const { result, transfer } = await runBuildJob({ type: 'build', jobId: req.requestId, params: req.params, parts: req.parts });
+      post({ type: 'onceResult', requestId: req.requestId, parts: result.parts, ms: result.ms }, transfer);
+    } catch (e) {
+      post({ type: 'onceError', requestId: req.requestId, message: e instanceof Error ? e.message : String(e) });
+    }
+    return;
+  }
   if (req.type !== 'build') return;
   try {
     const { result, transfer } = await runBuildJob(req);

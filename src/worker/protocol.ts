@@ -32,8 +32,16 @@ export type BuildResult = { type: 'result'; jobId: number; parts: PartMesh[]; ms
 export type BuildError = { type: 'error'; jobId: number; message: string };
 export type WorkerReady = { type: 'ready' };
 
-export type WorkerRequest = BuildRequest;
-export type WorkerResponse = BuildResult | BuildError | WorkerReady;
+/**
+ * One-off build (exports, calibration pieces). Has its own request id space, is never applied
+ * to the geometry snapshot, and is not affected by the latest-job-wins logic.
+ */
+export type BuildOnceRequest = { type: 'buildOnce'; requestId: number; params: Params; parts: PartId[] };
+export type BuildOnceResult = { type: 'onceResult'; requestId: number; parts: PartMesh[]; ms: number };
+export type BuildOnceError = { type: 'onceError'; requestId: number; message: string };
+
+export type WorkerRequest = BuildRequest | BuildOnceRequest;
+export type WorkerResponse = BuildResult | BuildError | WorkerReady | BuildOnceResult | BuildOnceError;
 
 /** The slice of the Worker interface the client uses; tests inject a fake. */
 export interface WorkerLike {

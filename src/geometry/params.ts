@@ -1,8 +1,8 @@
-import { RANGES, type Range } from './constants';
+import { PROBE_CLEARANCE, RANGES, type Range } from './constants';
 
 export type GloveMode = 'tube' | 'box';
 export type MountType = 'tape' | 'vesa' | 'amps' | 'magnets' | 'ivpole';
-export type ProbePresetId = 'custom' | 'butterflyIQ3' | 'vscanAirCL' | 'clariusHD3' | 'philipsLumify';
+export type ProbePresetId = 'custom' | 'butterflyIQ3' | 'vscanAirCL' | 'clariusHD3';
 
 export type Params = {
   tolerance: number;
@@ -32,23 +32,43 @@ export const DEFAULT_PARAMS: Readonly<Params> = {
 export type ProbePreset = {
   id: ProbePresetId;
   label: string;
-  /** Cradle cavity top width / depth in mm. Ignored for 'custom'. */
+  /** Published widest width / thickness of the probe body in mm (documentation; undefined for custom). */
+  probeW?: number;
+  probeD?: number;
+  /** Short source description. */
+  sourceNote: string;
+  /** Cradle cavity top width / depth in mm. Ignored for 'custom'. Derived from probeW/probeD when published. */
   cradleW: number;
   cradleD: number;
+  /** True only when caliper-measured. Nothing is yet. */
   verified: boolean;
 };
 
-// TODO(measure): every preset below carries the default 62 x 44 placeholder.
-// Never enter manufacturer dimensions; measure real devices with calipers first.
-export const PROBE_PRESETS: readonly ProbePreset[] = [
-  { id: 'custom', label: 'Custom size', cradleW: 62, cradleD: 44, verified: true },
-  { id: 'butterflyIQ3', label: 'Butterfly iQ3', cradleW: 62, cradleD: 44, verified: false },
-  { id: 'vscanAirCL', label: 'Vscan Air CL', cradleW: 62, cradleD: 44, verified: false },
-  { id: 'clariusHD3', label: 'Clarius HD3', cradleW: 62, cradleD: 44, verified: false },
-  { id: 'philipsLumify', label: 'Philips Lumify', cradleW: 62, cradleD: 44, verified: false },
-];
+const fromPublished = (probeW: number, probeD: number) => ({
+  probeW,
+  probeD,
+  cradleW: clampToRange(probeW + PROBE_CLEARANCE, RANGES.cradleW),
+  cradleD: clampToRange(probeD + PROBE_CLEARANCE, RANGES.cradleD),
+});
 
-export const PRESET_HELPER_TEXT = 'Preset sizes are not measured yet. Check yours with calipers';
+// TODO(measure): none of these are caliper-measured (verified stays false). Published sizes plus clearance are a
+// starting point only.
+export const PROBE_PRESETS: readonly ProbePreset[] = [
+  { id: 'custom', label: 'Custom size', sourceNote: 'Set with the sliders', cradleW: 62, cradleD: 44, verified: true },
+  {
+    id: 'butterflyIQ3', label: 'Butterfly iQ3', verified: false,
+    sourceNote: 'Butterfly Network specifications, 152 x 52 x 37 mm', ...fromPublished(52, 37),
+  },
+  {
+    id: 'vscanAirCL', label: 'Vscan Air CL', verified: false,
+    sourceNote: 'GE Vscan Air specifications, maximum 131 x 64 x 31 mm', ...fromPublished(64, 31),
+  },
+  {
+    // TODO(measure): re-check; only the C3 and L7 figures were confirmed, the other HD3 models are assumed to share the section.
+    id: 'clariusHD3', label: 'Clarius HD3', verified: false,
+    sourceNote: 'Clarius scanner dimensions table, 76 x 32 mm section', ...fromPublished(76, 32),
+  },
+];
 
 const PRESET_IDS = PROBE_PRESETS.map((p) => p.id);
 

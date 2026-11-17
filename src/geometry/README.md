@@ -8,7 +8,7 @@ for tests and in a web worker in the app.
 | File | Purpose |
 |---|---|
 | `constants.ts` | Every fixed number, defined once, plus the slider ranges |
-| `params.ts` | `Params`, defaults, `clampParams`, probe presets |
+| `params.ts` | `Params`, defaults, `clampParams`, probe presets (published size + `PROBE_CLEARANCE` 4 mm, none caliper-verified) |
 | `layout.ts` | Derived sizes and rail positions for the current parameters |
 | `dovetail.ts` | The shared rail and slot profile |
 | `manifold.ts` | WebAssembly loader and the `Scope` helper that owns every solid it creates |

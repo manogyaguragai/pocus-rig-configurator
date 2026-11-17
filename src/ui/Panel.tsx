@@ -1,5 +1,5 @@
-import { RANGES } from '../geometry/constants';
-import { MOUNT_TYPES, PRESET_HELPER_TEXT, PROBE_PRESETS, resolveProbe, type GloveMode, type MountType, type ProbePresetId } from '../geometry/params';
+import { PROBE_CLEARANCE, RANGES } from '../geometry/constants';
+import { MOUNT_TYPES, PROBE_PRESETS, resolveProbe, type GloveMode, type MountType, type ProbePresetId } from '../geometry/params';
 import { useConfigStore } from '../state/configStore';
 import { useRigStatus } from '../state/selectors';
 import { formatClearance, formatLength, statusView } from './format';
@@ -24,12 +24,19 @@ export function Panel() {
   const setParam = useConfigStore((s) => s.setParam);
   const reset = useConfigStore((s) => s.reset);
   const custom = params.probePreset === 'custom';
-  const unverified = !resolveProbe(params).verified;
+  const probe = resolveProbe(params);
+  const preset = PROBE_PRESETS.find((x) => x.id === params.probePreset);
+  const presetHelp = custom || !preset ? undefined : (
+    <>
+      {`Based on the manufacturer's published size plus ${formatLength(PROBE_CLEARANCE)} clearance. Check yours with calipers`}
+      <span className="help-size">{`${probe.cradleW.toFixed(1)} × ${probe.cradleD.toFixed(1)} mm`}</span>
+    </>
+  );
 
   return (
     <div className="panel">
       <h1 className="title">Size the rig to your kit</h1>
-      <p className="lead">A wall rig for a handheld probe, gel packets and gloves. Every part prints without supports</p>
+      <p className="lead">A wall rig for a handheld probe, gel packets and gloves. Every part fits a 256 mm bed</p>
 
       <section aria-labelledby="sec-printer">
         <h2 id="sec-printer">Printer</h2>
@@ -51,7 +58,7 @@ export function Panel() {
           value={params.probePreset}
           options={PROBE_OPTIONS}
           onChange={(v: ProbePresetId) => setParam('probePreset', v)}
-          help={unverified ? PRESET_HELPER_TEXT : undefined}
+          help={presetHelp}
         />
         {custom && (
           <>

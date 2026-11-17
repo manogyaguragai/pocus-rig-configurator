@@ -8,7 +8,7 @@ import { startApp } from '../state/app';
 import { useActiveRigParts, useBuildState } from '../state/selectors';
 import { ICON, Segmented } from './Controls';
 import { Panel, StatusRow } from './Panel';
-import { defaultExportHandlers, type ExportHandlers } from './exportHooks';
+import { defaultExportHandlers, useExportStore, type ExportHandlers } from './exportHooks';
 import { formatBBoxDims, printNote } from './format';
 
 const VIEW_OPTIONS: { value: ViewMode; label: string }[] = [
@@ -54,6 +54,9 @@ export function App(props: Partial<ExportHandlers> = {}) {
     if (selected && !active.includes(selected)) clearSelection();
   }, [selected, active, clearSelection]);
 
+  const exportBusy = useExportStore((s) => s.busy);
+  const exportError = useExportStore((s) => s.error);
+
   const selMesh = selected ? meshes[selected] : undefined;
 
   return (
@@ -65,13 +68,26 @@ export function App(props: Partial<ExportHandlers> = {}) {
           <span className="brand-sub">configurator</span>
         </div>
         <div className="spacer" />
-        <button type="button" className="link" onClick={handlers.onExportCalibration}>
+        <button
+          type="button"
+          className="link"
+          aria-label="Calibration piece"
+          disabled={exportBusy !== null}
+          aria-busy={exportBusy === 'calibration'}
+          onClick={handlers.onExportCalibration}
+        >
           <Ruler {...ICON} />
-          <span>Calibration piece</span>
+          <span>{exportBusy === 'calibration' ? 'Building piece' : 'Calibration piece'}</span>
         </button>
-        <button type="button" className="btn primary" onClick={handlers.onExportKit}>
+        <button
+          type="button"
+          className="btn primary"
+          disabled={exportBusy !== null}
+          aria-busy={exportBusy === 'kit'}
+          onClick={handlers.onExportKit}
+        >
           <Download {...ICON} />
-          <span>Download print kit</span>
+          <span>{exportBusy === 'kit' ? 'Building kit' : 'Download print kit'}</span>
         </button>
       </header>
 
@@ -87,9 +103,9 @@ export function App(props: Partial<ExportHandlers> = {}) {
               </button>
             </div>
             <div className="bed num">256 × 256 mm bed</div>
-            {build.error && (
+            {(build.error || exportError) && (
               <p className="build-error" role="alert">
-                {build.error}
+                {exportError ?? build.error}
               </p>
             )}
           </div>
@@ -104,9 +120,17 @@ export function App(props: Partial<ExportHandlers> = {}) {
               <span className="meta">Select a part</span>
             )}
             <div className="spacer" />
-            <button type="button" className="btn secondary" onClick={() => handlers.onExportPartStl(selected)}>
+            <button
+              type="button"
+              className="btn secondary"
+              disabled={!selected || exportBusy !== null}
+              aria-busy={exportBusy === 'part'}
+              aria-label={selected ? undefined : 'Part STL, select a part first'}
+              title={selected ? undefined : 'Select a part first'}
+              onClick={() => handlers.onExportPartStl(selected)}
+            >
               <Download {...ICON} />
-              <span>Part STL</span>
+              <span>{exportBusy === 'part' ? 'Building STL' : 'Part STL'}</span>
             </button>
           </div>
         </div>

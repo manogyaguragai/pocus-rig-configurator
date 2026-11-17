@@ -217,6 +217,11 @@ section h2 {
   color: var(--text-3);
   margin-top: var(--s2);
 }
+.help-size {
+  display: block;
+  font-family: var(--font-mono);
+  color: var(--text-2);
+}
 .reset {
   margin-top: var(--s8);
 }
@@ -525,4 +530,10 @@ input[type='range']::-moz-range-thumb {
   * {
     transition-duration: 0ms !important;
   }
+}
+
+.btn:disabled,
+.link:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
