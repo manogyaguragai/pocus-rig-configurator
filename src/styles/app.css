@@ -685,7 +685,7 @@ input[type='range']::-moz-range-thumb {
 .readout {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: var(--s4);
   padding: var(--s2) var(--s5);
   border-top: 1px solid var(--hairline);
@@ -695,6 +695,7 @@ input[type='range']::-moz-range-thumb {
   min-width: 0;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   align-items: baseline;
   gap: var(--s1) var(--s4);
 }
