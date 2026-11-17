@@ -11,7 +11,7 @@ Thumbs.db
 !.vscode/extensions.json
 .idea/
 *.blend1
-exports/
+/exports/
 *.stl
 *.3mf
 reference.zip
