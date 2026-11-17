@@ -406,7 +406,7 @@ input[type='range']::-moz-range-thumb {
   top: var(--s6);
   font-size: 12px;
   line-height: 16px;
-  color: var(--text-3);
+  color: var(--text-2);
   z-index: 2;
   pointer-events: none;
 }

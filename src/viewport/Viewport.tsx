@@ -30,6 +30,8 @@ function PartObject({ id, mesh, selected, xray }: { id: PartId; mesh: PartMesh; 
   useEffect(() => () => edges.dispose(), [edges]);
 
   const base = COLORS[PART_META[id].material];
+  // Slate has little albedo, so it reads black in shade; a faint self-lift keeps it slate.
+  const slate = PART_META[id].material === 'slate';
   const bbox: BBox = useMemo(() => positionsBBox(mesh.positions), [mesh]);
   const edgeColor = selected ? '#00735f' : PART_META[id].material === 'teal' ? '#065c4d' : '#11151a';
 
@@ -42,14 +44,15 @@ function PartObject({ id, mesh, selected, xray }: { id: PartId; mesh: PartMesh; 
           select(id);
         }}
         renderOrder={xray ? 1 : 0}
+        castShadow={!xray}
       >
         <meshStandardMaterial
           color={base}
           flatShading
           roughness={0.72}
           metalness={0}
-          emissive={selected ? '#7fe3cf' : '#000000'}
-          emissiveIntensity={selected ? 0.18 : 0}
+          emissive={selected ? '#7fe3cf' : slate ? base : '#000000'}
+          emissiveIntensity={selected ? 0.18 : slate ? 0.3 : 0}
           transparent={xray}
           opacity={xray ? 0.22 : 1}
           depthWrite={!xray}
@@ -143,6 +146,11 @@ function Bed({ cx, cy }: { cx: number; cy: number }) {
         <meshBasicMaterial color="#e9e9eb" />
       </mesh>
       <primitive object={grid} position={[cx, cy, 0]} />
+      {/* Soft neutral contact shadow so the rig sits on the bed instead of floating */}
+      <mesh position={[cx, cy, 0.02]} receiveShadow>
+        <planeGeometry args={[BED, BED]} />
+        <shadowMaterial transparent opacity={0.2} />
+      </mesh>
       <Line points={outline} color="#a3a3a8" lineWidth={1.5} />
     </group>
   );
@@ -179,12 +187,26 @@ export function Viewport({ meshes, className }: ViewportProps) {
         dpr={[1, 2]}
         camera={{ up: [0, 0, 1], fov: 32, near: 5, far: 4000, position: [230, -420, 300] }}
         onPointerMissed={clear}
+        shadows="soft"
         gl={{ antialias: true }}
       >
         <color attach="background" args={[VIEWPORT_BG]} />
         <CameraSetup target={framing} />
         <hemisphereLight args={['#ffffff', '#c8ccd0', 1.1]} up={[0, 0, 1]} />
-        <directionalLight position={[300, -400, 600]} intensity={1.6} />
+        <directionalLight
+          position={[300, -400, 600]}
+          intensity={1.6}
+          castShadow
+          shadow-mapSize={[2048, 2048]}
+          shadow-bias={-0.0004}
+          shadow-radius={5}
+          shadow-camera-left={-320}
+          shadow-camera-right={320}
+          shadow-camera-top={320}
+          shadow-camera-bottom={-320}
+          shadow-camera-near={50}
+          shadow-camera-far={1600}
+        />
         <directionalLight position={[-400, -100, 250]} intensity={0.5} />
         <Bed cx={framing.x} cy={framing.y} />
         <Rig meshes={meshes} />
