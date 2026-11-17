@@ -90,6 +90,9 @@ The response should be `200` with `content-type: application/wasm`.
 
 ## Embed in another page
 
+Embedding follows the license below: credit Dr. Mandeep Guragai and Manogya Guragai
+on the page that holds the embed, and keep it non-commercial.
+
 ```html
 <iframe
   src="https://<user>.github.io/<repo>/"
@@ -153,5 +156,12 @@ The geometry is a port of `reference/pocus_rig.py`; see
 
 ## License
 
-MIT for the code, see [LICENSE](LICENSE). The models follow the POCUS Collective
-library terms.
+Creative Commons Attribution-NonCommercial 4.0 (CC BY-NC 4.0), see
+[LICENSE](LICENSE). It covers the code, the web app and the 3D models.
+
+- Free to download, use, share and modify.
+- Credit Dr. Mandeep Guragai and Manogya Guragai when you use or share the
+  software, the web app or any model made with it, and say if you changed it.
+- No selling and no commercial use of the software, the web app or the models.
+
+Third-party packages keep their own licenses.

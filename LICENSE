@@ -1,0 +1,30 @@
+POCUS Rig Configurator
+Copyright (c) 2026 Dr. Mandeep Guragai and Manogya Guragai
+
+Licensed under the Creative Commons Attribution-NonCommercial 4.0
+International license (CC BY-NC 4.0). This covers the whole project: the
+source code, the web app, and the 3D models it generates (STL and 3MF files).
+
+Full legal text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
+
+In short, you may:
+
+  - Download, use and share the web app, the code and the models for free.
+  - Modify them and share your changes.
+
+On these conditions:
+
+  - Credit: give credit to Dr. Mandeep Guragai and Manogya Guragai whenever you
+    use or share the software, the web app or any model made with it. Link to
+    this license and say if you changed anything.
+      Dr. Mandeep Guragai: https://www.linkedin.com/in/mandeep-guragai-280589117/
+      Manogya Guragai:     https://www.linkedin.com/in/manogya-guragai/
+  - Non-commercial only: you may not sell the software, the web app or the
+    models, or use them for commercial purposes, without written permission
+    from the authors. Printing parts for your own use or for a clinic's own
+    use is fine; selling printed parts or the files is not.
+
+Third-party packages used by the project keep their own licenses.
+
+The software and models are provided as is, without warranty of any kind. They
+are not a medical device.
