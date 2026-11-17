@@ -181,6 +181,40 @@ describe('criterion 4: all 320 parameter-space corners', () => {
   }, 1_800_000);
 });
 
+describe('user module and plate sizes: extremes stay valid and never collide', () => {
+  it('gel, glove and plate size corners at the cradle extremes', async () => {
+    const bad: string[] = [];
+    let n = 0;
+    for (const [cradleW, cradleD] of [[30, 20], [80, 60]] as const)
+      for (const lo of [true, false])
+        for (const gloveMode of ['tube', 'box'] as const)
+          for (const mount of ['vesa', 'ivpole'] as const) {
+            const sizes = lo
+              ? { gelW: 40, gloveBoxW: 90, gloveBoxH: 50, tubeD: 40, tubeH: 70, plateW: 120, plateH: 150 }
+              : { gelW: 90, gloveBoxW: 180, gloveBoxH: 150, tubeD: 90, tubeH: 200, plateW: 250, plateH: 250 };
+            const p = clampParams({ ...DEFAULT_PARAMS, cradleW, cradleD, gloveMode, mount, ...sizes });
+            const tag = `W${cradleW} D${cradleD} ${lo ? 'min' : 'max'} sizes ${gloveMode} ${mount}`;
+            n++;
+            for (const r of await buildAll(p, api)) {
+              if (r.status !== 'NoError') bad.push(`${tag} ${r.id}: status ${r.status}`);
+              if (checkMeshEdges(r.mesh).nonManifoldEdges || checkMeshEdges(r.printMesh).nonManifoldEdges) bad.push(`${tag} ${r.id}: non-manifold`);
+              for (let a = 0; a < 3; a++) {
+                const d = r.printBBox.max[a]! - r.printBBox.min[a]!;
+                if (d > 250) bad.push(`${tag} ${r.id}: print bbox axis ${a} = ${d.toFixed(1)}`);
+              }
+            }
+            const s = new Scope(api);
+            try {
+              for (const { pair, vol } of pairIntersections(s, assembled(s, p)))
+                if (!(vol < EPS)) bad.push(`${tag} ${pair}: intersection ${vol} mm3`);
+            } finally { s.dispose(); }
+          }
+    if (bad.length) err(bad.slice(0, 40).join('\n'));
+    expect(n).toBe(16);
+    expect(bad).toEqual([]);
+  }, 600_000);
+});
+
 describe('probe presets: manifold, fit 250 mm, no mating intersections', () => {
   it('every preset at defaults and at corners', async () => {
     const bad: string[] = [];

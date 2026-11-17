@@ -1,18 +1,18 @@
 import {
-  CADDY_BEVEL, CADDY_BEVEL_SEGS, DISP_INSET_X, DISP_Z1, FRONT_CUT_Y_IN, FRONT_CUT_Y_OUT, GEL_D, GEL_W,
+  CADDY_BEVEL, CADDY_BEVEL_SEGS, DISP_INSET_X, DISP_Z1, FRONT_CUT_Y_IN, FRONT_CUT_Y_OUT, GEL_D,
   MODULE_BACK_Y, MODULE_WALL, THUMB_R, THUMB_Z, VIEW_BEVEL, VIEW_HALF_X, VIEW_Z0, VIEW_Z1_BELOW_TOP,
 } from '../constants';
 import { addFemaleBlock } from '../dovetail';
 import { layout } from '../layout';
 import type { PartBuilder } from '../types';
 
-/** Port of make_gel_caddy. Height = gelH + wall; x follows the holster width; back aligned at y = -8. */
+/** Port of make_gel_caddy. Height = gelH + wall, inner width = gelW; x follows the holster width; back aligned at y = -8. */
 export const buildCaddy: PartBuilder = (s, params) => {
   const L = layout(params);
   const wl = MODULE_WALL;
   const h = params.gelH;
   const x0 = L.moduleInnerX;
-  const x1 = x0 + GEL_W + 2 * wl;
+  const x1 = x0 + params.gelW + 2 * wl;
   const y1 = MODULE_BACK_Y;
   const y0 = y1 - (GEL_D + 2 * wl);
   const cx = (x0 + x1) / 2;

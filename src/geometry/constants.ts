@@ -10,6 +10,15 @@ export const RANGES = {
   cradleD: { min: 20, max: 60, step: 0.5, default: 44 },
   holsterH: { min: 100, max: 160, step: 1, default: 100 },
   gelH: { min: 85, max: 200, step: 1, default: 125 },
+  gelW: { min: 40, max: 90, step: 1, default: 55 },
+  gloveBoxW: { min: 90, max: 180, step: 1, default: 132 },
+  gloveBoxH: { min: 50, max: 150, step: 1, default: 73 },
+  tubeD: { min: 40, max: 90, step: 1, default: 50 },
+  tubeH: { min: 70, max: 200, step: 1, default: 110 },
+  // Plate minimums keep every mount pattern clear of the edges: VESA 100 counterbores need
+  // width 120; the upper keyhole must stay above the rail (z 80) and VESA holes need height 150.
+  plateW: { min: 120, max: 250, step: 1, default: 124 },
+  plateH: { min: 150, max: 250, step: 1, default: 170 },
 } as const satisfies Record<string, Range>;
 
 /** Clearance added to each published probe dimension (width and thickness) to get the cradle top size. */
@@ -101,8 +110,7 @@ export const CUT_OVERSHOOT = 1;
 
 // Module walls (caddy, glove parts) 3 mm (SPEC 4b)
 export const MODULE_WALL = 3.0;
-// Gel packet inner clearance 55 x 35 (SPEC 4b)
-export const GEL_W = 55.0;
+// Gel packet inner depth 35 (SPEC 4b); inner width is the gelW param (default 55)
 export const GEL_D = 35.0;
 /** caddy height = packet + wall (SPEC 4c) */
 export const CADDY_BEVEL = 2;
@@ -120,11 +128,10 @@ export const DISP_Z1 = 15;
 export const THUMB_R = 15;
 export const THUMB_Z = 15;
 
-// Glove tube: bore dia 50, wall 3, height 110, front gap 34 (SPEC 4b)
-export const TUBE_R_IN = 25.0;
+// Glove tube: wall 3; bore diameter and height are the tubeD / tubeH params (defaults 50, 110) (SPEC 4b)
 export const TUBE_WALL = 3.0;
-export const TUBE_H = 110.0;
-export const TUBE_GAP = 34.0;
+/** Front C-clip gap as a fraction of the bore diameter (ref 34 at 50). */
+export const TUBE_GAP_FRAC = 0.68;
 export const TUBE_SEGS = 96;
 export const TUBE_WEB_HALF_Y = 12;
 export const TUBE_WEB_X_FROM_CENTRE = 15; // web box starts at cx + 15
@@ -136,10 +143,9 @@ export const TUBE_PLATE_CLEAR = 1; // tube centre clamp: back edge stays <= this
 export const TUBE_WEB_TRIM = 0.2; // web end sits this short of the embedded block face
 export const TUBE_CUT_TOP_EXTRA = 5; // bore / gap cutters reach this far above the tube
 
-// Glove box bracket: inner 132 x 87, wall height 73 (SPEC 4b; ref 130+2, 85+2)
-export const GLOVEBOX_INNER_W = 132.0;
+// Glove box bracket: inner depth 87 (SPEC 4b; ref 85+2); inner width and wall height are the
+// gloveBoxW / gloveBoxH params (defaults 132, 73)
 export const GLOVEBOX_INNER_D = 87.0;
-export const GLOVEBOX_WALL_H = 73.0;
 export const GLOVEBOX_BEVEL = 2;
 export const GLOVEBOX_WIN_INSET_X = 16;
 export const GLOVEBOX_WIN_Z0 = 18;
@@ -147,16 +153,17 @@ export const GLOVEBOX_WIN_Y_OUT = 3;
 export const GLOVEBOX_WIN_Y_IN = 6;
 export const GLOVEBOX_WIN_BEVEL = 3;
 export const GLOVEBOX_BAND_Z = [55] as const;
+/** Bands stay at least this far below the wall top on short brackets. */
+export const GLOVEBOX_BAND_TOP_CLEAR = 12;
 export const GLOVEBOX_BAND_H = 4;
 export const GLOVEBOX_BAND_INSET_Y = 20;
 
-// Wall plate 124 x 170 x 8; z0 = -35 in the Blender frame (SPEC 4b; ref PLATE)
-export const PLATE_W = 124.0;
-export const PLATE_H = 170.0;
+// Wall plate thickness 8; z0 = -35 in the Blender frame (SPEC 4b; ref PLATE 124 x 170). Width and
+// height are the plateW / plateH params; the bottom stays at z0 and extra height goes on top.
 export const PLATE_T = 8.0;
 export const PLATE_Z0 = -35.0;
 export const PLATE_BEVEL = 3;
-/** Hole-pattern centre z (ref 50). Patterns are 2x on the plate centreline x = 0. */
+/** Hole-pattern centre z (ref 50, plate centre at defaults). Fixed to the rail, not the plate size. */
 export const HOLE_CENTRE_Z = 50;
 export const VESA75_HALF = 37.5;
 export const VESA100_HALF = 50.0;

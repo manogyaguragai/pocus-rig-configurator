@@ -42,8 +42,15 @@ describe('PART_DEPS matches reality', () => {
     cradleD: { cradleD: 50 },
     holsterH: { holsterH: 130 },
     gelH: { gelH: 150 },
+    gelW: { gelW: 70 },
+    gloveBoxW: { gloveBoxW: 150 },
+    gloveBoxH: { gloveBoxH: 100 },
+    tubeD: { tubeD: 60 },
+    tubeH: { tubeH: 140 },
     gloveMode: { gloveMode: 'box' },
     mount: { mount: 'vesa' },
+    plateW: { plateW: 160 },
+    plateH: { plateH: 200 },
   };
   const base = new Map<PartId, ReturnType<typeof mesh>>();
   const baseMesh = (id: PartId) => {
@@ -138,3 +145,67 @@ describe('tape plate', () => {
   });
 });
 
+
+describe('gel and glove holder sizes', () => {
+  const size = (id: PartId, p: Partial<Params>) => {
+    const s = new Scope(api);
+    try {
+      const m = BUILDERS[id](s, P(p));
+      expect(m.status(), `${id} ${JSON.stringify(p)}`).toBe('NoError');
+      expect(m.decompose().length, `${id} ${JSON.stringify(p)}`).toBe(1);
+      const b = m.boundingBox();
+      return [0, 1, 2].map((i) => b.max[i]! - b.min[i]!);
+    } finally { s.dispose(); }
+  };
+  const xSpan = (id: PartId, p: Partial<Params>) => size(id, p)[0]!;
+
+  it('gelW widens the caddy body one-for-one', () => {
+    expect(xSpan('caddy', { gelW: 70 }) - xSpan('caddy', { gelW: 55 })).toBeCloseTo(15, 4);
+  });
+  it('gloveBoxW / gloveBoxH set the bracket width and wall height', () => {
+    expect(xSpan('gloveBox', { gloveBoxW: 150 }) - xSpan('gloveBox', { gloveBoxW: 132 })).toBeCloseTo(18, 4);
+    expect(size('gloveBox', { gloveBoxH: 120 })[2]).toBeCloseTo(120, 4);
+  });
+  it('tubeD / tubeH set the tube bore and height', () => {
+    expect(size('gloveTube', { tubeH: 150 })[2]).toBeCloseTo(150, 4);
+    expect(size('gloveTube', { tubeD: 70 })[1]).toBeGreaterThan(size('gloveTube', { tubeD: 50 })[1]!);
+  });
+  for (const cradleD of [20, 60])
+    for (const [gelW, gloveBoxW, gloveBoxH, tubeD, tubeH] of [[40, 90, 50, 40, 70], [90, 180, 150, 90, 200]] as const)
+      it(`range corner D${cradleD} gel${gelW} box${gloveBoxW}x${gloveBoxH} tube${tubeD}x${tubeH} is one manifold piece`, () => {
+        const p = { cradleD, gelW, gloveBoxW, gloveBoxH, tubeD, tubeH };
+        for (const id of ['caddy', 'gloveBox', 'gloveTube'] as const) size(id, p).forEach((v) => expect(v).toBeLessThanOrEqual(250));
+      });
+});
+
+describe('wall plate size', () => {
+  const dims = (p: Partial<Params>) => {
+    const s = new Scope(api);
+    try {
+      const m = BUILDERS.plate(s, P(p));
+      expect(m.status()).toBe('NoError');
+      expect(m.decompose().length).toBe(1);
+      const b = m.boundingBox();
+      return { w: b.max[0]! - b.min[0]!, z0: b.min[2]!, z1: b.max[2]! };
+    } finally { s.dispose(); }
+  };
+  it('plateW sets the width and plateH grows the plate upward from a fixed bottom', () => {
+    expect(dims({ plateW: 200 }).w).toBeCloseTo(200, 4);
+    const tall = dims({ plateH: 230 });
+    expect(tall.z0).toBeCloseTo(-35, 4);
+    expect(tall.z1).toBeCloseTo(195, 4);
+  });
+  // every mount pattern must stay a clean cut (no hole breaking an edge or the rail) at the size limits
+  for (const mount of ['tape', 'vesa', 'amps', 'magnets', 'ivpole'] as const)
+    for (const [plateW, plateH] of [[120, 150], [250, 250], [120, 250], [250, 150]] as const)
+      it(`${mount} at ${plateW} x ${plateH} is one piece with only through-holes as handles`, () => {
+        const s = new Scope(api);
+        try {
+          const m = BUILDERS.plate(s, P({ mount, plateW, plateH }));
+          const ref = BUILDERS.plate(s, P({ mount }));
+          expect(m.status()).toBe('NoError');
+          expect(m.decompose().length).toBe(1);
+          expect(m.genus()).toBe(ref.genus()); // same holes as at the default size: none merged or opened to an edge
+        } finally { s.dispose(); }
+      });
+});

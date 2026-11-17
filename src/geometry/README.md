@@ -38,6 +38,13 @@ for tests and in a web worker in the app.
   is 4.5 mm and the wall behind the tunnels is 3.5 mm.
 - Calibration females carry one, two or three notches, so the volume is about
   3% under the single reference female.
+- Gel packet width, glove box width and height, glove tube diameter and height,
+  and wall plate width and height are user sizes. The tube's front gap scales
+  with the bore (0.68 of the diameter). The glove box band stays 12 mm under the
+  wall top on short brackets. The plate bottom stays fixed and extra height goes
+  on top, so the mount holes keep their place relative to the rail.
+- Modules shorter than the slot block (84 mm), such as the default glove box,
+  have the block stand above their walls.
 - At cradle depth 60 the caddy and glove slot blocks extend about 5.5 mm past
   the module body. The parts stay valid and do not touch.
 

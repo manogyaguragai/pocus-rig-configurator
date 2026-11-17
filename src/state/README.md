@@ -9,7 +9,7 @@
 
 ## Hash format
 
-`#t=0.25&p=custom&w=62&d=44&h=100&g=125&gl=tube&m=tape&v=1`
+`#t=0.25&p=custom&w=62&d=44&h=100&g=125&gw=55&gl=tube&bw=132&bh=73&td=50&th=110&m=tape&pw=124&ph=170&v=1`
 
 | Key | Field | Values |
 |---|---|---|
@@ -19,13 +19,21 @@
 | `d` | cradleD | 20 to 60 |
 | `h` | holsterH | 100 to 160 |
 | `g` | gelH | 85 to 200 |
+| `gw` | gelW | 40 to 90 |
 | `gl` | gloveMode | `tube`, `box` |
+| `bw` | gloveBoxW | 90 to 180 |
+| `bh` | gloveBoxH | 50 to 150 |
+| `td` | tubeD | 40 to 90 |
+| `th` | tubeH | 70 to 200 |
 | `m` | mount | `tape`, `vesa`, `amps`, `magnets`, `ivpole` |
+| `pw` | plateW | 120 to 250 |
+| `ph` | plateH | 150 to 250 |
 | `v` | version | `1` |
 
 Decoding keeps valid fields only. Numbers are clamped to range and unknown enum
 values are dropped. A hash with a different `v`, or with no usable field, is
-ignored. Decoding never throws.
+ignored. Decoding never throws. Links made before a key existed still load; the
+missing fields take their defaults.
 
 ## Load order
 

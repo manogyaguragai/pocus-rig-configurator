@@ -5,19 +5,21 @@ export const STORAGE_KEY = 'pocus-rig-config';
 
 export type StorageLike = Pick<Storage, 'getItem' | 'setItem'>;
 
-const NUM_KEYS = { t: 'tolerance', w: 'cradleW', d: 'cradleD', h: 'holsterH', g: 'gelH' } as const;
+const NUM_KEYS = { t: 'tolerance', w: 'cradleW', d: 'cradleD', h: 'holsterH', g: 'gelH', gw: 'gelW', bw: 'gloveBoxW', bh: 'gloveBoxH', td: 'tubeD', th: 'tubeH', pw: 'plateW', ph: 'plateH' } as const;
 const ENUMS = {
   p: { key: 'probePreset', allowed: PROBE_PRESETS.map((x) => x.id) as readonly string[] },
   gl: { key: 'gloveMode', allowed: GLOVE_MODES as readonly string[] },
   m: { key: 'mount', allowed: MOUNT_TYPES as readonly string[] },
 } as const;
 
-/** e.g. `t=0.25&p=custom&w=62&d=44&h=100&g=125&gl=tube&m=tape&v=1` (no leading #). */
+/** e.g. `t=0.25&p=custom&w=62&d=44&h=100&g=125&gw=55&gl=tube&bw=132&bh=73&td=50&th=110&m=tape&pw=124&ph=170&v=1` (no leading #).
+ *  Older links without the newer keys still decode; missing fields fall back to defaults. */
 export function encodeHash(params: Params): string {
   const q = clampParams(params);
   return [
     `t=${q.tolerance}`, `p=${q.probePreset}`, `w=${q.cradleW}`, `d=${q.cradleD}`,
-    `h=${q.holsterH}`, `g=${q.gelH}`, `gl=${q.gloveMode}`, `m=${q.mount}`, `v=${HASH_VERSION}`,
+    `h=${q.holsterH}`, `g=${q.gelH}`, `gw=${q.gelW}`, `gl=${q.gloveMode}`, `bw=${q.gloveBoxW}`, `bh=${q.gloveBoxH}`,
+    `td=${q.tubeD}`, `th=${q.tubeH}`, `m=${q.mount}`, `pw=${q.plateW}`, `ph=${q.plateH}`, `v=${HASH_VERSION}`,
   ].join('&');
 }
 

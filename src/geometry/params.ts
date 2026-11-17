@@ -11,8 +11,15 @@ export type Params = {
   cradleD: number;
   holsterH: number;
   gelH: number;
+  gelW: number;
   gloveMode: GloveMode;
+  gloveBoxW: number;
+  gloveBoxH: number;
+  tubeD: number;
+  tubeH: number;
   mount: MountType;
+  plateW: number;
+  plateH: number;
 };
 
 export const GLOVE_MODES: readonly GloveMode[] = ['tube', 'box'];
@@ -25,8 +32,15 @@ export const DEFAULT_PARAMS: Readonly<Params> = {
   cradleD: RANGES.cradleD.default,
   holsterH: RANGES.holsterH.default,
   gelH: RANGES.gelH.default,
+  gelW: RANGES.gelW.default,
   gloveMode: 'tube',
+  gloveBoxW: RANGES.gloveBoxW.default,
+  gloveBoxH: RANGES.gloveBoxH.default,
+  tubeD: RANGES.tubeD.default,
+  tubeH: RANGES.tubeH.default,
   mount: 'tape',
+  plateW: RANGES.plateW.default,
+  plateH: RANGES.plateH.default,
 };
 
 export type ProbePreset = {
@@ -94,8 +108,15 @@ export function clampParams(p: Partial<Params> | Params): Params {
     cradleD: clampToRange(q.cradleD, RANGES.cradleD),
     holsterH: clampToRange(q.holsterH, RANGES.holsterH),
     gelH: clampToRange(q.gelH, RANGES.gelH),
+    gelW: clampToRange(q.gelW, RANGES.gelW),
     gloveMode: pickEnum(q.gloveMode, GLOVE_MODES, DEFAULT_PARAMS.gloveMode),
+    gloveBoxW: clampToRange(q.gloveBoxW, RANGES.gloveBoxW),
+    gloveBoxH: clampToRange(q.gloveBoxH, RANGES.gloveBoxH),
+    tubeD: clampToRange(q.tubeD, RANGES.tubeD),
+    tubeH: clampToRange(q.tubeH, RANGES.tubeH),
     mount: pickEnum(q.mount, MOUNT_TYPES, DEFAULT_PARAMS.mount),
+    plateW: clampToRange(q.plateW, RANGES.plateW),
+    plateH: clampToRange(q.plateH, RANGES.plateH),
   };
 }
 

@@ -20,14 +20,16 @@ afterEach(() => vi.restoreAllMocks());
 
 describe('hash', () => {
   it('default format and round trip', () => {
-    expect(encodeHash(D)).toBe('t=0.25&p=custom&w=62&d=44&h=100&g=125&gl=tube&m=tape&v=1');
+    expect(encodeHash(D)).toBe('t=0.25&p=custom&w=62&d=44&h=100&g=125&gw=55&gl=tube&bw=132&bh=73&td=50&th=110&m=tape&pw=124&ph=170&v=1');
     expect(clampParams(decodeHash('#' + encodeHash(D))!)).toEqual(D);
   });
   it('round trips random valid params', () => {
     for (let i = 0; i < 300; i++) {
       const p = clampParams({
         tolerance: rnd(RANGES.tolerance), cradleW: rnd(RANGES.cradleW), cradleD: rnd(RANGES.cradleD),
-        holsterH: rnd(RANGES.holsterH), gelH: rnd(RANGES.gelH),
+        holsterH: rnd(RANGES.holsterH), gelH: rnd(RANGES.gelH), gelW: rnd(RANGES.gelW),
+        gloveBoxW: rnd(RANGES.gloveBoxW), gloveBoxH: rnd(RANGES.gloveBoxH), tubeD: rnd(RANGES.tubeD), tubeH: rnd(RANGES.tubeH),
+        plateW: rnd(RANGES.plateW), plateH: rnd(RANGES.plateH),
         probePreset: pick(PROBE_PRESETS).id, gloveMode: pick(GLOVE_MODES), mount: pick(MOUNT_TYPES),
       });
       expect(decodeHash(encodeHash(p))).toEqual(p);

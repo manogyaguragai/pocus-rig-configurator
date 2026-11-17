@@ -54,10 +54,10 @@ export type PartResult = {
 /** Which Params keys change each part (SPEC 5: dependency-scoped rebuilds). */
 export const PART_DEPS: Readonly<Record<PartId, readonly (keyof Params)[]>> = {
   holster: ['tolerance', 'probePreset', 'cradleW', 'cradleD', 'holsterH'],
-  caddy: ['tolerance', 'probePreset', 'cradleW', 'cradleD', 'gelH'],
-  gloveTube: ['tolerance', 'probePreset', 'cradleW', 'cradleD'],
-  gloveBox: ['tolerance', 'probePreset', 'cradleW', 'cradleD'],
-  plate: ['mount'],
+  caddy: ['tolerance', 'probePreset', 'cradleW', 'cradleD', 'gelH', 'gelW'],
+  gloveTube: ['tolerance', 'probePreset', 'cradleW', 'cradleD', 'tubeD', 'tubeH'],
+  gloveBox: ['tolerance', 'probePreset', 'cradleW', 'cradleD', 'gloveBoxW', 'gloveBoxH'],
+  plate: ['mount', 'plateW', 'plateH'],
   vclamp: ['mount'],
   calibMale: [],
   calibFemaleLo: ['tolerance'],
