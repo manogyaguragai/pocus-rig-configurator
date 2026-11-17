@@ -1,0 +1,140 @@
+{
+ "Calib_Female": {
+  "nonmanifold_edges": 0,
+  "loose_verts": 0,
+  "volume_cm3": 1.23,
+  "tris": 140,
+  "dims_mm": [
+   25.0,
+   7.75,
+   10.0
+  ]
+ },
+ "Calib_Male": {
+  "nonmanifold_edges": 0,
+  "loose_verts": 0,
+  "volume_cm3": 3.03,
+  "tris": 148,
+  "dims_mm": [
+   30.0,
+   13.0,
+   10.0
+  ]
+ },
+ "Gel_Packet_Caddy": {
+  "nonmanifold_edges": 0,
+  "loose_verts": 0,
+  "volume_cm3": 82.86,
+  "tris": 936,
+  "dims_mm": [
+   68.75,
+   41.0,
+   128.0
+  ]
+ },
+ "Glove_Side_Module": {
+  "nonmanifold_edges": 0,
+  "loose_verts": 0,
+  "volume_cm3": 61.83,
+  "tris": 1496,
+  "dims_mm": [
+   63.75,
+   56.0,
+   110.0
+  ]
+ },
+ "Glove_Side_Module_BoxBracket": {
+  "nonmanifold_edges": 0,
+  "loose_verts": 0,
+  "volume_cm3": 124.53,
+  "tris": 720,
+  "dims_mm": [
+   145.75,
+   93.0,
+   84.0
+  ]
+ },
+ "Mount_IV_Pole_VClamp": {
+  "nonmanifold_edges": 0,
+  "loose_verts": 0,
+  "volume_cm3": 87.59,
+  "tris": 796,
+  "dims_mm": [
+   60.0,
+   25.0,
+   70.0
+  ]
+ },
+ "POCUS_Holster": {
+  "nonmanifold_edges": 0,
+  "loose_verts": 0,
+  "volume_cm3": 151.47,
+  "tris": 1204,
+  "dims_mm": [
+   80.0,
+   59.75,
+   100.0
+  ]
+ },
+ "Universal_Mount_Plate": {
+  "nonmanifold_edges": 0,
+  "loose_verts": 0,
+  "volume_cm3": 160.14,
+  "tris": 4962,
+  "dims_mm": [
+   124.0,
+   13.0,
+   170.0
+  ]
+ },
+ "_interference": {
+  "Universal_Mount_Plate|POCUS_Holster": 0,
+  "POCUS_Holster|Gel_Packet_Caddy": 0,
+  "POCUS_Holster|Glove_Side_Module": 0,
+  "POCUS_Holster|Glove_Side_Module_BoxBracket": 0,
+  "Calib_Male|Calib_Female": 0,
+  "Gel_Packet_Caddy|Glove_Side_Module": 0
+ },
+ "_print_bbox": {
+  "POCUS_Holster": [
+   80.0,
+   59.8,
+   100.0
+  ],
+  "Gel_Packet_Caddy": [
+   68.8,
+   41.0,
+   128.0
+  ],
+  "Glove_Side_Module": [
+   63.8,
+   56.0,
+   110.0
+  ],
+  "Glove_Side_Module_BoxBracket": [
+   145.8,
+   93.0,
+   84.0
+  ],
+  "Universal_Mount_Plate": [
+   124.0,
+   170.0,
+   13.0
+  ],
+  "Mount_IV_Pole_VClamp": [
+   60.0,
+   70.0,
+   25.0
+  ],
+  "Calib_Male": [
+   30.0,
+   13.0,
+   10.0
+  ],
+  "Calib_Female": [
+   25.0,
+   7.8,
+   10.0
+  ]
+ }
+}

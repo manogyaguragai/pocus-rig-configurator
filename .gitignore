@@ -1,0 +1,23 @@
+node_modules/
+dist/
+.vite/
+coverage/
+*.log
+.env
+.env.*
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.blend1
+exports/
+*.stl
+*.3mf
+reference.zip
+# AI / Claude Code working files — local only
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+AGENTS.md
+ai-notes/
